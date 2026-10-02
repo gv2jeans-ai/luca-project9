@@ -4,27 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LUCA 생태 탐사 프로그램 설계 시스템</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & ReactDOM (React 18 CDN) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <!-- Babel Standalone -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <style>
+        .active-card { border-color: #10b981 !important; background-color: #ecfdf5 !important; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans">
-    <div id="root"></div>
+    <div id="app-container" class="max-w-xl mx-auto min-h-screen bg-white shadow-md flex flex-col">
+        <!-- 헤더 -->
+        <header class="bg-emerald-600 text-white p-4 shadow-sm flex justify-between items-center">
+            <h1 class="font-bold text-lg">🌿 LUCA 생태 탐사 설계</h1>
+            <span class="text-xs bg-emerald-700 px-2 py-1 rounded">교사용 모드</span>
+        </header>
 
-    <script type="text/babel">
-        const { useState, useMemo } = React;
+        <!-- Step 인디케이터 -->
+        <div class="bg-slate-100 p-3 border-b flex justify-between text-xs font-semibold text-slate-500 overflow-x-auto">
+            <span id="step-nav-1" class="text-emerald-600 font-bold">1. 학교급</span>
+            <span>›</span>
+            <span id="step-nav-2">2. 권역</span>
+            <span>›</span>
+            <span id="step-nav-3">3. 과목</span>
+            <span>›</span>
+            <span id="step-nav-4">4. 프로젝트</span>
+            <span>›</span>
+            <span id="step-nav-5">5. 전문가</span>
+        </div>
 
-        // 학교급 데이터
+        <!-- 메인 콘텐츠 영역 -->
+        <main id="main-content" class="flex-1 p-5"></main>
+
+        <!-- 푸터 버튼 -->
+        <footer id="footer-buttons" class="p-4 border-t bg-white flex justify-between gap-3">
+            <button id="btn-prev" onclick="changeStep(-1)" class="flex-1 py-3 border rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 hidden">이전</button>
+            <button id="btn-next" onclick="changeStep(1)" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow hover:bg-emerald-700">다음 단계 ></button>
+        </footer>
+    </div>
+
+    <script>
+        // 데이터 세팅
         const SCHOOL_LEVELS = [
             { id: 'middle', name: '중학교', desc: '기초 생태 탐구 및 시각 자료·체험 중심 프로젝트' },
             { id: 'high', name: '고등학교', desc: '심화 데이터 분석, 학술 심층 탐구 및 입법·정책 연계 프로젝트' }
         ];
 
-        // 과목 데이터
         const SUBJECTS = [
             { id: 'kor', level: 'middle', dept: '국어과', name: '국어', code: '[9국03-04]', desc: '설득하는 글쓰기, 환경 비평 및 공익광고 카피 작성' },
             { id: 'math', level: 'middle', dept: '수학과', name: '수학', code: '[9수04-08]', desc: '생태 데이터 통계 분석, 기하학적 최소 거리 분석 및 수학 모델링' },
@@ -107,224 +129,193 @@
             }
         };
 
-        function App() {
-            const [step, setStep] = useState(1);
-            const [selectedSchool, setSelectedSchool] = useState(SCHOOL_LEVELS[0]);
-            const [selectedZone, setSelectedZone] = useState(ZONES[0]);
-            
-            const filteredSubjects = useMemo(() => {
-                return SUBJECTS.filter(sub => sub.level === selectedSchool.id);
-            }, [selectedSchool]);
+        // 상태 변수
+        let currentStep = 1;
+        let selectedSchool = SCHOOL_LEVELS[0];
+        let selectedZone = ZONES[0];
+        let selectedSubject = SUBJECTS[0];
+        let selectedExpert = EXPERTS[0];
+        let selectedDate = '2026-10-14';
 
-            const [selectedSubject, setSelectedSubject] = useState(filteredSubjects[0] || SUBJECTS[0]);
-            const [selectedExpert, setSelectedExpert] = useState(EXPERTS[0]);
-            const [selectedDate, setSelectedDate] = useState('2026-10-14');
-
-            const handleSchoolSelect = (school) => {
-                setSelectedSchool(school);
-                const nextSubjects = SUBJECTS.filter(sub => sub.level === school.id);
-                if (nextSubjects.length > 0) {
-                    setSelectedSubject(nextSubjects[0]);
+        function render() {
+            // Step 표시 업데이트
+            for (let i = 1; i <= 5; i++) {
+                const nav = document.getElementById(`step-nav-${i}`);
+                if (nav) {
+                    if (i <= currentStep) nav.className = 'text-emerald-600 font-bold';
+                    else nav.className = '';
                 }
-            };
+            }
 
-            const currentProject = PROJECT_MAP[selectedZone.id]?.[selectedSubject.id] || {
-                title: '📌 맞춤형 생태 탐구 프로젝트',
-                tasks: ['생태 현장 데이터 수집', '데이터 정제 및 분석', '정책 제안 및 결과보고서 제출']
-            };
+            // 버튼 상태 업데이트
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const footer = document.getElementById('footer-buttons');
 
-            return (
-                <div className="max-w-xl mx-auto min-h-screen bg-white shadow-md flex flex-col">
-                    <header className="bg-emerald-600 text-white p-4 shadow-sm flex justify-between items-center">
-                        <h1 className="font-bold text-lg">🌿 LUCA 생태 탐사 설계</h1>
-                        <span className="text-xs bg-emerald-700 px-2 py-1 rounded">교사용 모드</span>
-                    </header>
+            if (currentStep === 1) btnPrev.classList.add('hidden');
+            else btnPrev.classList.remove('hidden');
 
-                    <div className="bg-slate-100 p-3 border-b flex justify-between text-xs font-semibold text-slate-500 overflow-x-auto">
-                        <span className={step >= 1 ? 'text-emerald-600 font-bold' : ''}>1. 학교급</span>
-                        <span>›</span>
-                        <span className={step >= 2 ? 'text-emerald-600 font-bold' : ''}>2. 권역</span>
-                        <span>›</span>
-                        <span className={step >= 3 ? 'text-emerald-600 font-bold' : ''}>3. 과목</span>
-                        <span>›</span>
-                        <span className={step >= 4 ? 'text-emerald-600 font-bold' : ''}>4. 프로젝트</span>
-                        <span>›</span>
-                        <span className={step >= 5 ? 'text-emerald-600 font-bold' : ''}>5. 전문가</span>
+            if (currentStep === 5) btnNext.innerText = '최종 예약 완료';
+            else btnNext.innerText = '다음 단계 >';
+
+            if (currentStep === 6) footer.classList.add('hidden');
+            else footer.classList.remove('hidden');
+
+            // 메인 화면 그리기
+            const main = document.getElementById('main-content');
+            
+            if (currentStep === 1) {
+                main.innerHTML = `
+                    <div class="space-y-4">
+                        <h2 class="text-lg font-bold text-slate-800">STEP 1. 학교급을 선택하세요</h2>
+                        <div class="space-y-3">
+                            ${SCHOOL_LEVELS.map(s => `
+                                <div onclick="selectSchool('${s.id}')" class="p-4 border rounded-xl cursor-pointer transition ${selectedSchool.id === s.id ? 'active-card' : 'hover:border-slate-300'}">
+                                    <h3 class="font-bold text-slate-800 text-base">${s.name}</h3>
+                                    <p class="text-xs text-slate-600 mt-1">${s.desc}</p>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
-
-                    <main className="flex-1 p-5">
-                        {step === 1 && (
-                            <div className="space-y-4">
-                                <h2 className="text-lg font-bold text-slate-800">STEP 1. 학교급을 선택하세요</h2>
-                                <div className="space-y-3">
-                                    {SCHOOL_LEVELS.map((school) => (
-                                        <div 
-                                            key={school.id}
-                                            onClick={() => handleSchoolSelect(school)}
-                                            className={`p-4 border rounded-xl cursor-pointer transition ${selectedSchool.id === school.id ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/20' : 'hover:border-slate-300'}`}
-                                        >
-                                            <h3 className="font-bold text-slate-800 text-base">{school.name}</h3>
-                                            <p className="text-xs text-slate-600 mt-1">{school.desc}</p>
-                                        </div>
-                                    ))}
+                `;
+            } else if (currentStep === 2) {
+                main.innerHTML = `
+                    <div class="space-y-4">
+                        <h2 class="text-lg font-bold text-slate-800">STEP 2. 탐사 권역을 선택하세요</h2>
+                        <div class="space-y-2">
+                            ${ZONES.map(z => `
+                                <div onclick="selectZone('${z.id}')" class="p-4 border rounded-xl cursor-pointer transition ${selectedZone.id === z.id ? 'active-card' : 'hover:border-slate-300'}">
+                                    <h3 class="font-bold text-slate-800">${z.name}</h3>
+                                    <p class="text-xs text-emerald-600 font-medium mt-0.5">지역: ${z.cities}</p>
+                                    <p class="text-xs text-slate-500 mt-1">${z.desc}</p>
                                 </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (currentStep === 3) {
+                const filtered = SUBJECTS.filter(s => s.level === selectedSchool.id);
+                main.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-800">STEP 3. 담당 과목을 선택하세요</h2>
+                                <span class="text-xs text-emerald-600 font-medium">선택된 학교급: ${selectedSchool.name}</span>
                             </div>
-                        )}
-
-                        {step === 2 && (
-                            <div className="space-y-4">
-                                <h2 className="text-lg font-bold text-slate-800">STEP 2. 탐사 권역을 선택하세요</h2>
-                                <div className="space-y-2">
-                                    {ZONES.map((zone) => (
-                                        <div 
-                                            key={zone.id}
-                                            onClick={() => setSelectedZone(zone)}
-                                            className={`p-4 border rounded-xl cursor-pointer transition ${selectedZone.id === zone.id ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/20' : 'hover:border-slate-300'}`}
-                                        >
-                                            <h3 className="font-bold text-slate-800">{zone.name}</h3>
-                                            <p className="text-xs text-emerald-600 font-medium mt-0.5">지역: {zone.cities}</p>
-                                            <p className="text-xs text-slate-500 mt-1">{zone.desc}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {step === 3 && (
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-end">
-                                    <div>
-                                        <h2 className="text-lg font-bold text-slate-800">STEP 3. 담당 과목을 선택하세요</h2>
-                                        <span className="text-xs text-emerald-600 font-medium">선택된 학교급: {selectedSchool.name}</span>
+                            <span class="text-xs text-slate-500">총 ${filtered.length}개 교과</span>
+                        </div>
+                        <div class="space-y-2 max-h-[440px] overflow-y-auto pr-1">
+                            ${filtered.map(sub => `
+                                <div onclick="selectSubject('${sub.id}')" class="p-3.5 border rounded-xl cursor-pointer transition ${selectedSubject.id === sub.id ? 'active-card' : 'hover:border-slate-300'}">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">${sub.dept}</span>
+                                        <span class="text-xs font-mono text-slate-400">${sub.code}</span>
                                     </div>
-                                    <span className="text-xs text-slate-500">총 {filteredSubjects.length}개 교과</span>
+                                    <h3 class="font-bold text-slate-800 text-sm">${sub.name}</h3>
+                                    <p class="text-xs text-slate-600 mt-0.5">${sub.desc}</p>
                                 </div>
-                                <div className="space-y-2 max-h-[440px] overflow-y-auto pr-1">
-                                    {filteredSubjects.map((sub) => (
-                                        <div 
-                                            key={sub.id}
-                                            onClick={() => setSelectedSubject(sub)}
-                                            className={`p-3.5 border rounded-xl cursor-pointer transition ${selectedSubject.id === sub.id ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/20' : 'hover:border-slate-300'}`}
-                                        >
-                                            <div className="flex justify-between items-center mb-1">
-                                                <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">{sub.dept}</span>
-                                                <span className="text-xs font-mono text-slate-400">{sub.code}</span>
-                                            </div>
-                                            <h3 className="font-bold text-slate-800 text-sm">{sub.name}</h3>
-                                            <p className="text-xs text-slate-600 mt-0.5">{sub.desc}</p>
-                                        </div>
-                                    ))}
-                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (currentStep === 4) {
+                const proj = PROJECT_MAP[selectedZone.id]?.[selectedSubject.id] || {
+                    title: '📌 맞춤형 생태 탐구 프로젝트',
+                    tasks: ['생태 현장 데이터 수집', '데이터 정제 및 분석', '정책 제안 및 결과보고서 제출']
+                };
+                main.innerHTML = `
+                    <div class="space-y-4">
+                        <h2 class="text-lg font-bold text-slate-800">STEP 4. 맞춤형 프로젝트 확인</h2>
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded">매칭 완료</span>
+                                <h3 class="font-bold text-emerald-900 text-sm">[${selectedSchool.name}] ${selectedZone.name} x ${selectedSubject.name}</h3>
                             </div>
-                        )}
-
-                        {step === 4 && (
-                            <div className="space-y-4">
-                                <h2 className="text-lg font-bold text-slate-800">STEP 4. 맞춤형 프로젝트 확인</h2>
-                                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
-                                    <div className="flex items-center space-x-2">
-                                        <span className="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded">매칭 완료</span>
-                                        <h3 className="font-bold text-emerald-900 text-sm">
-                                            [{selectedSchool.name}] {selectedZone.name} x {selectedSubject.name}
-                                        </h3>
-                                    </div>
-                                    <div className="bg-white p-3.5 rounded-lg border text-sm space-y-2">
-                                        <p className="font-bold text-slate-800">{currentProject.title}</p>
-                                        <div className="text-xs font-semibold text-slate-500 mt-2">주요 산출물:</div>
-                                        <ul className="text-xs text-slate-600 list-disc list-inside space-y-1">
-                                            {currentProject.tasks.map((task, idx) => (
-                                                <li key={idx}>{task}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                    
-                                    <div className="flex gap-2">
-                                        <a href="./guide.pdf" download className="flex-1 bg-white border border-slate-300 text-slate-800 text-xs py-2 rounded-lg font-medium hover:bg-slate-50 text-center flex items-center justify-center">
-                                            📄 지도안 다운로드
-                                        </a>
-                                        <a href="./student_guide.pdf" download className="flex-1 bg-white border border-slate-300 text-slate-800 text-xs py-2 rounded-lg font-medium hover:bg-slate-50 text-center flex items-center justify-center">
-                                            📱 학생용 가이드
-                                        </a>
-                                    </div>
-                                </div>
+                            <div class="bg-white p-3.5 rounded-lg border text-sm space-y-2">
+                                <p class="font-bold text-slate-800">${proj.title}</p>
+                                <div class="text-xs font-semibold text-slate-500 mt-2">주요 산출물:</div>
+                                <ul class="text-xs text-slate-600 list-disc list-inside space-y-1">
+                                    ${proj.tasks.map(t => `<li>${t}</li>`).join('')}
+                                </ul>
                             </div>
-                        )}
-
-                        {step === 5 && (
-                            <div className="space-y-4">
-                                <h2 className="text-lg font-bold text-slate-800">STEP 5. 전문가 매칭 및 일정 선택</h2>
-                                <div className="space-y-3">
-                                    <label className="block text-xs font-bold text-slate-600">지원 전문가 선택</label>
-                                    {EXPERTS.map((exp) => (
-                                        <div 
-                                            key={exp.id}
-                                            onClick={() => setSelectedExpert(exp)}
-                                            className={`p-3 border rounded-lg cursor-pointer transition ${selectedExpert.id === exp.id ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-500/20' : 'hover:border-slate-300'}`}
-                                        >
-                                            <div className="font-bold text-sm">{exp.name} <span className="text-xs font-normal text-slate-500">({exp.field})</span></div>
-                                            <div className="text-xs text-slate-600">{exp.desc}</div>
-                                        </div>
-                                    ))}
-
-                                    <label className="block text-xs font-bold text-slate-600 mt-4">수업 희망 일자</label>
-                                    <input 
-                                        type="date" 
-                                        value={selectedDate} 
-                                        onChange={(e) => setSelectedDate(e.target.value)}
-                                        className="w-full p-2 border rounded-lg text-sm bg-white"
-                                    />
-                                </div>
+                            <div class="flex gap-2">
+                                <a href="./guide.pdf" download class="flex-1 bg-white border border-slate-300 text-slate-800 text-xs py-2 rounded-lg font-medium hover:bg-slate-50 text-center flex items-center justify-center">📄 지도안 다운로드</a>
+                                <a href="./student_guide.pdf" download class="flex-1 bg-white border border-slate-300 text-slate-800 text-xs py-2 rounded-lg font-medium hover:bg-slate-50 text-center flex items-center justify-center">📱 학생용 가이드</a>
                             </div>
-                        )}
-
-                        {step === 6 && (
-                            <div className="text-center py-6 space-y-4">
-                                <div className="text-4xl">🎉</div>
-                                <h2 className="text-xl font-bold text-slate-800">프로젝트 예약 완료!</h2>
-                                <p className="text-xs text-slate-500">선택하신 조건으로 수업 패키지 생성이 완료되었습니다.</p>
-
-                                <div className="bg-slate-50 border p-4 rounded-xl text-left text-xs space-y-2">
-                                    <div><span className="font-bold">학교급:</span> {selectedSchool.name}</div>
-                                    <div><span className="font-bold">권역:</span> {selectedZone.name}</div>
-                                    <div><span class="font-bold">과목:</span> {selectedSubject.name} ({selectedSubject.code})</div>
-                                    <div><span className="font-bold">프로젝트:</span> {currentProject.title.replace('📌 ', '')}</div>
-                                    <div><span className="font-bold">전문가:</span> {selectedExpert.name} ({selectedExpert.field})</div>
-                                    <div><span className="font-bold">일시:</span> {selectedDate}</div>
+                        </div>
+                    </div>
+                `;
+            } else if (currentStep === 5) {
+                main.innerHTML = `
+                    <div class="space-y-4">
+                        <h2 class="text-lg font-bold text-slate-800">STEP 5. 전문가 매칭 및 일정 선택</h2>
+                        <div class="space-y-3">
+                            <label class="block text-xs font-bold text-slate-600">지원 전문가 선택</label>
+                            ${EXPERTS.map(exp => `
+                                <div onclick="selectExpert(${exp.id})" class="p-3 border rounded-lg cursor-pointer transition ${selectedExpert.id === exp.id ? 'active-card' : 'hover:border-slate-300'}">
+                                    <div class="font-bold text-sm">${exp.name} <span class="text-xs font-normal text-slate-500">(${exp.field})</span></div>
+                                    <div class="text-xs text-slate-600">${exp.desc}</div>
                                 </div>
+                            `).join('')}
 
-                                <div className="space-y-2 pt-2">
-                                    <a href="./guide.pdf" download className="block w-full bg-emerald-600 text-white text-xs py-3 rounded-xl font-bold shadow hover:bg-emerald-700 text-center">
-                                        📄 행정 결재용 서류 패키지 다운로드 (.pdf)
-                                    </a>
-                                </div>
-                            </div>
-                        )}
-                    </main>
-
-                    {step < 6 && (
-                        <footer className="p-4 border-t bg-white flex justify-between gap-3">
-                            {step > 1 && (
-                                <button 
-                                    onClick={() => setStep(step - 1)}
-                                    className="flex-1 py-3 border rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50"
-                                >
-                                    이전
-                                </button>
-                            )}
-                            <button 
-                                onClick={() => setStep(step + 1)}
-                                className="flex-1 py-3 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow hover:bg-emerald-700"
-                            >
-                                {step === 5 ? '최종 예약 완료' : '다음 단계 >'}
-                            </button>
-                        </footer>
-                    )}
-                </div>
-            );
+                            <label class="block text-xs font-bold text-slate-600 mt-4">수업 희망 일자</label>
+                            <input type="date" value="${selectedDate}" onchange="selectedDate=this.value" class="w-full p-2 border rounded-lg text-sm bg-white" />
+                        </div>
+                    </div>
+                `;
+            } else if (currentStep === 6) {
+                const proj = PROJECT_MAP[selectedZone.id]?.[selectedSubject.id] || { title: '📌 맞춤형 생태 탐구 프로젝트' };
+                main.innerHTML = `
+                    <div class="text-center py-6 space-y-4">
+                        <div class="text-4xl">🎉</div>
+                        <h2 class="text-xl font-bold text-slate-800">프로젝트 예약 완료!</h2>
+                        <p class="text-xs text-slate-500">선택하신 조건으로 수업 패키지 생성이 완료되었습니다.</p>
+                        <div class="bg-slate-50 border p-4 rounded-xl text-left text-xs space-y-2">
+                            <div><span class="font-bold">학교급:</span> ${selectedSchool.name}</div>
+                            <div><span class="font-bold">권역:</span> ${selectedZone.name}</div>
+                            <div><span class="font-bold">과목:</span> ${selectedSubject.name} (${selectedSubject.code})</div>
+                            <div><span class="font-bold">프로젝트:</span> ${proj.title.replace('📌 ', '')}</div>
+                            <div><span class="font-bold">전문가:</span> ${selectedExpert.name} (${selectedExpert.field})</div>
+                            <div><span class="font-bold">일시:</span> ${selectedDate}</div>
+                        </div>
+                        <div class="space-y-2 pt-2">
+                            <a href="./guide.pdf" download class="block w-full bg-emerald-600 text-white text-xs py-3 rounded-xl font-bold shadow hover:bg-emerald-700 text-center">📄 행정 결재용 서류 패키지 다운로드 (.pdf)</a>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // 이벤트 핸들러 함수들
+        function selectSchool(id) {
+            selectedSchool = SCHOOL_LEVELS.find(s => s.id === id);
+            const filtered = SUBJECTS.filter(s => s.level === id);
+            if (filtered.length > 0) selectedSubject = filtered[0];
+            render();
+        }
+
+        function selectZone(id) {
+            selectedZone = ZONES.find(z => z.id === id);
+            render();
+        }
+
+        function selectSubject(id) {
+            selectedSubject = SUBJECTS.find(s => s.id === id);
+            render();
+        }
+
+        function selectExpert(id) {
+            selectedExpert = EXPERTS.find(e => e.id === id);
+            render();
+        }
+
+        function changeStep(delta) {
+            currentStep += delta;
+            render();
+        }
+
+        // 초기 실행
+        render();
     </script>
 </body>
 </html>
