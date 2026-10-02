@@ -37,7 +37,7 @@
             { id: 'art', level: 'middle', dept: '미술과', name: '미술', code: '[9미02-03]', desc: '팝아트 포스터, 공공 미술 비오톱 설계, 업사이클링 정크아트' },
             { id: 'tech', level: 'middle', dept: '기술·가정', name: '기술·가정', code: '[9기02-06]', desc: '저탄소 식단 개발, 업사이클링 패션, 스마트 그린 홈 적정기술 설계' },
             
-            // 고등학교 과목 예시 데이터 (필요 시 교육과정 성취기준 코드 수정 가능)
+            // 고등학교 과목 예시 데이터
             { id: 'kor_h', level: 'high', dept: '국어과', name: '독서/언어와 매체', code: '[10국02-02]', desc: '생태 심층 학술 논평 작성 및 환경 매체 비평 프로젝트' },
             { id: 'sci_h', level: 'high', dept: '과학과', name: '생명과학 I', code: '[12생과05-02]', desc: '군집 생물 다양성 지수 산출 및 군집 변동 정량 분석' }
         ];
@@ -144,7 +144,7 @@
                         <span class="text-xs bg-emerald-700 px-2 py-1 rounded">교사용 모드</span>
                     </header>
 
-                    <!-- Step 인디케이터 (1. 학교급 -> 2. 권역 -> 3. 과목 -> 4. 프로젝트 -> 5. 전문가) -->
+                    {/* Step 인디케이터 (1. 학교급 -> 2. 권역 -> 3. 과목 -> 4. 프로젝트 -> 5. 전문가) */}
                     <div class="bg-slate-100 p-3 border-b flex justify-between text-xs font-semibold text-slate-500 overflow-x-auto">
                         <span class={step >= 1 ? 'text-emerald-600 font-bold' : ''}>1. 학교급</span>
                         <span>›</span>
@@ -158,7 +158,7 @@
                     </div>
 
                     <main class="flex-1 p-5">
-                        <!-- STEP 1: 학교급 선택 -->
+                        {/* STEP 1: 학교급 선택 */}
                         {step === 1 && (
                             <div class="space-y-4">
                                 <h2 class="text-lg font-bold text-slate-800">STEP 1. 학교급을 선택하세요</h2>
@@ -177,7 +177,7 @@
                             </div>
                         )}
 
-                        <!-- STEP 2: 권역 선택 -->
+                        {/* STEP 2: 권역 선택 */}
                         {step === 2 && (
                             <div class="space-y-4">
                                 <h2 class="text-lg font-bold text-slate-800">STEP 2. 탐사 권역을 선택하세요</h2>
@@ -197,7 +197,7 @@
                             </div>
                         )}
 
-                        <!-- STEP 3: 과목 선택 -->
+                        {/* STEP 3: 과목 선택 */}
                         {step === 3 && (
                             <div class="space-y-4">
                                 <div class="flex justify-between items-end">
@@ -226,7 +226,7 @@
                             </div>
                         )}
 
-                        <!-- STEP 4: 맞춤형 프로젝트 확인 -->
+                        {/* STEP 4: 맞춤형 프로젝트 확인 */}
                         {step === 4 && (
                             <div class="space-y-4">
                                 <h2 class="text-lg font-bold text-slate-800">STEP 4. 맞춤형 프로젝트 확인</h2>
@@ -259,7 +259,7 @@
                             </div>
                         )}
 
-                        <!-- STEP 5: 전문가 매칭 및 일정 선택 -->
+                        {/* STEP 5: 전문가 매칭 및 일정 선택 */}
                         {step === 5 && (
                             <div class="space-y-4">
                                 <h2 class="text-lg font-bold text-slate-800">STEP 5. 전문가 매칭 및 일정 선택</h2>
@@ -287,7 +287,7 @@
                             </div>
                         )}
 
-                        <!-- STEP 6: 예약 완료 -->
+                        {/* STEP 6: 예약 완료 */}
                         {step === 6 && (
                             <div class="text-center py-6 space-y-4">
                                 <div class="text-4xl">🎉</div>
